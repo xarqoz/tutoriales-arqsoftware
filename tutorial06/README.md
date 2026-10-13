@@ -63,7 +63,23 @@ docker ps
    y body `{"producto_id": 1, "cantidad": 2}`. El JSON debe decir
    **"procesada exitosamente por el Microservicio Flask"**. 🔀
 3. **Logs de orquestación:** salida de `docker compose logs nginx` donde se vea el
-   redireccionamiento de las peticiones a los **dos backends distintos** (`django_v1` y
-   `flask_v2`). 🧾
+   redireccionamiento a los **dos backends distintos**. El `nginx.conf` usa un
+   `log_format` personalizado que imprime `upstream=<ip>:<puerto>`:
+   - `upstream=...:8000` → **Django (v1)**
+   - `upstream=...:5000` → **Flask (v2)**
+
+   Genere tráfico a ambas rutas antes de capturar:
+   ```bash
+   curl http://localhost/api/v1/productos/
+   curl -X POST http://localhost/api/v2/comprar \
+        -H "Content-Type: application/json" -d '{"producto_id": 1, "cantidad": 2}'
+   docker compose logs nginx
+   ```
+   Verá dos líneas como:
+   ```
+   nginx-1 | 172.x.x.x "GET /api/v1/productos/ HTTP/1.1" status=200 -> upstream=172.x.x.x:8000 [...]
+   nginx-1 | 172.x.x.x "POST /api/v2/comprar HTTP/1.1" status=200 -> upstream=172.x.x.x:5000 [...]
+   ```
+   Dos upstreams distintos (`:8000` Django, `:5000` Flask) = Strangler Pattern funcionando. 🧾
 
 > 💡 Al terminar: `docker compose down` y detenga la instancia para ahorrar créditos.
