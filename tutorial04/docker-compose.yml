@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Base de datos PostgreSQL
   db:
@@ -11,6 +9,13 @@ services:
       - POSTGRES_DB=tienda_db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=secret_password
+    # Healthcheck: Postgres tarda unos segundos en aceptar conexiones.
+    # 'web' esperará a que esté realmente listo (service_healthy).
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tienda_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   # API Django
   web:
@@ -22,7 +27,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy   # arranca solo cuando Postgres acepta conexiones
     environment:
       # Deben coincidir con lo que espera settings.py
       - DB_NAME=tienda_db

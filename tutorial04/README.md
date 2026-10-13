@@ -22,7 +22,7 @@ instancia **AWS EC2**. La configuración deja de "quemar" credenciales: todo pas
 
 ## A) Prueba local con Docker Compose
 
-Requisito: Docker Desktop instalado.
+Requisito: Docker Desktop / OrbStack instalado.
 
 ```bash
 # Desde la carpeta de este tutorial
@@ -36,7 +36,21 @@ docker compose exec web python manage.py seed_datos
 docker compose ps
 ```
 
-Pruebe la API en: `http://localhost:8000/api/v1/comprar/`
+> El servicio `web` espera a que PostgreSQL esté **listo** (healthcheck en `db`), así se
+> evita el error `connection to server at "db" ... Connection refused` al arrancar.
+
+### Probar la API
+
+- **GET (navegable):** `http://localhost:8000/api/v1/inventario/` → lista los libros y su
+  stock en JSON. Úselo para la captura de evidencia (JSON claro servido por Docker/AWS).
+- **POST (compra):** `/api/v1/comprar/` **solo acepta POST**. Por navegador verá un 405
+  (es normal). Pruébelo con curl o Postman:
+
+```bash
+curl -i -X POST http://localhost:8000/api/v1/comprar/ \
+  -H "Content-Type: application/json" \
+  -d '{"libro_id": 1, "direccion_envio": "Calle 123", "cantidad": 1}'
+```
 
 Para apagar todo:
 ```bash
