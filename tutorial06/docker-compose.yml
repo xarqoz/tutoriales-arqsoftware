@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # Base de datos del monolito
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=tienda_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret_password
+
+  # El Monolito (v1) — Django + Gunicorn
+  web_django:
+    build: .
+    command: gunicorn Tienda.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    environment:
+      - DB_NAME=tienda_db
+      - DB_USER=postgres
+      - DB_PASSWORD=secret_password
+      - DB_HOST=db
+      - DB_PORT=5432
+
+  # El Microservicio (v2) — EL ESTRANGULADOR (Flask)
+  pagos_flask:
+    build: ./microservicio_pagos
+    ports:
+      - "5000:5000"   # solo para pruebas iniciales; luego se puede cerrar
+
+  # Proxy Inverso: decide a quién enruta según la versión de la API
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - web_django
+      - pagos_flask
+
+volumes:
+  postgres_data:
