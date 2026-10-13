@@ -34,8 +34,10 @@ source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 # 2. Base de datos + datos de prueba (3 libros con stock)
-python manage.py migrate
+python manage.py migrate            # ya incluye la migración de tienda_app
 python manage.py seed_datos
+
+# (Si alguna vez cambia los modelos, regenere con: python manage.py makemigrations)
 
 # 3. Levantar el servidor
 python manage.py runserver

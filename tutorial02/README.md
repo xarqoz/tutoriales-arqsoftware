@@ -17,7 +17,7 @@ mediante variables de entorno, y **Builder** gestiona la construcción de la `Or
 ```bash
 python -m venv venv && source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-python manage.py migrate
+python manage.py migrate            # ya incluye la migración de tienda_app
 python manage.py seed_datos
 ```
 

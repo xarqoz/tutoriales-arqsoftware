@@ -19,7 +19,7 @@ vistas HTML como a clientes JSON.
 ```bash
 python -m venv venv && source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-python manage.py migrate
+python manage.py migrate            # ya incluye la migración de tienda_app
 python manage.py seed_datos
 python manage.py runserver
 ```
